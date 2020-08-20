@@ -1,7 +1,7 @@
 """
- * Copyright 2020, Departamento de sistemas y Computación, Universidad de Los Andes
+ * Copyright 2020, Departamento de sistemas y ComputaciÃ³n, Universidad de Los Andes
  * 
- * Contribución de:
+ * ContribuciÃ³n de:
  *
  * Cristian Camilo Castellanos
  *
@@ -23,7 +23,7 @@
  """
 
 """
-  Este módulo es una aplicación básica con un menú de opciones para cargar datos, contar elementos, y hacer búsquedas sobre una lista.
+  Este mÃ³dulo es una aplicaciÃ³n bÃ¡sica con un menÃº de opciones para cargar datos, contar elementos, y hacer bÃºsquedas sobre una lista.
 """
 
 import config as cf
@@ -61,17 +61,17 @@ def loadCSVFile (file, lst, sep=";"):
         print("Se presento un error en la carga del archivo")
     
     t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
+    print("Tiempo de ejecuciÃ³n ",t1_stop-t1_start," segundos")
 
 def printMenu():
     """
     Imprime el menu de opciones
     """
     print("\nBienvenido")
-    print("1- Cargar Datos")
-    print("2- Contar los elementos de la Lista")
-    print("3- Contar elementos filtrados por palabra clave")
-    print("4- Consultar elementos a partir de dos listas")
+    print("1- Cargar Datos Movies casting")
+    print("2- Cargar Datos Movies details")
+    print("3- Saber cuantas buenas peliculas existen de un director")
+    print("4- Conocer las peliculas mas/menos votadas y las mejores/peores votadas")
     print("0- Salir")
 
 def countElementsFilteredByColumn(criteria, column, lst):
@@ -83,13 +83,13 @@ def countElementsFilteredByColumn(criteria, column, lst):
         column
             Columna del arreglo sobre la cual se debe realizar el conteo
         list
-            Lista en la cual se realizará el conteo, debe estar inicializada
+            Lista en la cual se realizarÃ¡ el conteo, debe estar inicializada
     Return:
         counter :: int
             la cantidad de veces ue aparece un elemento con el criterio definido
     """
     if len(lst)==0:
-        print("La lista esta vacía")  
+        print("La lista esta vacÃ­a")  
         return 0
     else:
         t1_start = process_time() #tiempo inicial
@@ -98,44 +98,112 @@ def countElementsFilteredByColumn(criteria, column, lst):
             if criteria.lower() in element[column].lower(): #filtrar por palabra clave 
                 counter+=1
         t1_stop = process_time() #tiempo final
-        print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
+        print("Tiempo de ejecuciÃ³n ",t1_stop-t1_start," segundos")
     return counter
 
-def countElementsByCriteria(criteria, column, lst):
-    """
-    Retorna la cantidad de elementos que cumplen con un criterio para una columna dada
-    """
-    return 0
+def encontrarbuenaspeliculas(director,listacasting,listadetails):
+    listaid=[]
+    totalcalificacion=0
+    totalpeliculas=0
+    
+    for i in range(1,len(listacasting)):
+        if listacasting[i]["director_name"]==director:
+            listaid.append(listacasting[i]["id"])
+            
+    for i in range(1,len(listadetails)):
+        if listadetails[i]["id"] in listaid:
+            if float(listadetails[i]["vote_average"])>=6.0:
+                totalcalificacion=totalcalificacion+float(listadetails[i]["vote_average"])
+                totalpeliculas=totalpeliculas+1
+                    
+    promediocalificacion=round((totalcalificacion/totalpeliculas),2)
+    
+    texto="Su numero de peliculas buenas son: "+str(totalpeliculas)+". Su promedio de calificacion es: "+str(promediocalificacion)
+    
+    return texto
 
+def rankingpeliculas(listadetails,masvotadas,menosvotadas,mejoresvotadas,peoresvotadas):
+    listaaverage=[]
+    listacount=[]
+    retorno={}
+    
+    for i in range(1,len(listadetails)):
+        listaaverage.append(listadetails[i]["vote_average"])
+        listacount.append(listadetails[i]["vote_count"])
+        
+    if masvotadas==1:
+        nombremaxcount=[]
+        listacount=sorted(listacount)
+        listacount=listacount[::-1]
+        listamaxcount=(listacount[0:10])
+        for i in range(0,len(listamaxcount)):
+            for j in range(1,len(listadetails)):
+                if int(listamaxcount[i])==int(listadetails[j]["vote_count"]) and listadetails[j]["title"] not in nombremaxcount and len(nombremaxcount)<10:
+                    nombremaxcount.append(listadetails[j]["title"])
+        retorno["mas_votadas"]=nombremaxcount
+        
+    if menosvotadas==1:
+        nombremincount=[]
+        listacount=sorted(listacount)
+        listamincount=(listacount[0:10])
+        for i in range(0,len(listamaxcount)):
+            for j in range(1,len(listadetails)):
+                if int(listamincount[i])==int(listadetails[j]["vote_count"]) and listadetails[j]["title"] not in nombremincount and len(nombremincount)<10:
+                    nombremincount.append(listadetails[j]["title"])
+        retorno["menos_votadas"]=nombremincount
+        
+    if mejoresvotadas==1:
+        nombremaxaverage=[]
+        listaaverage=sorted(listaaverage)
+        listaaverage=listaaverage[::-1]
+        listamaxaverage=(listaaverage[0:10])
+        for i in range(0,len(listamaxaverage)):
+            for j in range(1,len(listadetails)):
+                if float(listamaxaverage[i])==float(listadetails[j]["vote_count"]) and listadetails[j]["title"] not in nombremaxaverage and len(nombremaxaverage)<10:
+                    nombremaxaverage.append(listadetails[j]["title"])
+        retorno["mejores_votadas"]=nombremaxaverage
+        
+    if peoresvotadas==1:
+        nombreminaverage=[]
+        listaaverage=sorted(listaaverage)
+        listaminaverage=(listaaverage[0:10])
+        for i in range(0,len(listaminaverage)):
+            for j in range(1,len(listadetails)):
+                if float(listaminaverage[i])==float(listadetails[j]["vote_count"]) and listadetails[j]["title"] not in nombreminaverage and len(nombreminaverage)<10:
+                    nombreminaverage.append(listadetails[j]["title"])
+        retorno["peores_votadas"]=nombreminaverage
+        
+    return retorno
 
 def main():
     """
-    Método principal del programa, se encarga de manejar todos los metodos adicionales creados
+    MÃ©todo principal del programa, se encarga de manejar todos los metodos adicionales creados
 
-    Instancia una lista vacia en la cual se guardarán los datos cargados desde el archivo
+    Instancia una lista vacia en la cual se guardarÃ¡n los datos cargados desde el archivo
     Args: None
     Return: None 
     """
-    lista = [] #instanciar una lista vacia
+    listacasting = [] #instanciar una lista vacia
+    listadetails = []
     while True:
         printMenu() #imprimir el menu de opciones en consola
-        inputs =input('Seleccione una opción para continuar\n') #leer opción ingresada
+        inputs =input('Seleccione una opciÃ³n para continuar\n') #leer opciÃ³n ingresada
         if len(inputs)>0:
             if int(inputs[0])==1: #opcion 1
-                loadCSVFile("Data/test.csv", lista) #llamar funcion cargar datos
-                print("Datos cargados, "+str(len(lista))+" elementos cargados")
+                loadCSVFile("Data/MoviesCastingRaw-small.csv", listacasting) #llamar funcion cargar datos
+                print("Datos de casting cargados, "+str(len(listacasting))+" elementos cargados")
             elif int(inputs[0])==2: #opcion 2
-                if len(lista)==0: #obtener la longitud de la lista
-                    print("La lista esta vacía")    
-                else: print("La lista tiene "+str(len(lista))+" elementos")
+                loadCSVFile("Data/SmallMoviesDetailsCleaned.csv", listadetails) #llamar funcion cargar datos
+                print("Datos de details cargados, "+str(len(listadetails))+" elementos cargados")
             elif int(inputs[0])==3: #opcion 3
-                criteria =input('Ingrese el criterio de búsqueda\n')
-                counter=countElementsFilteredByColumn(criteria, "nombre", lista) #filtrar una columna por criterio  
-                print("Coinciden ",counter," elementos con el crtierio: ", criteria  )
+               director=str(input("Escriba el nombre del director: "))
+               print(encontrarbuenaspeliculas(director,listacasting,listadetails))
             elif int(inputs[0])==4: #opcion 4
-                criteria =input('Ingrese el criterio de búsqueda\n')
-                counter=countElementsByCriteria(criteria,0,lista)
-                print("Coinciden ",counter," elementos con el crtierio: '", criteria ,"' (en construcción ...)")
+                masvotadas=int(input("Desea conocer las 10 peliculas mas votadas? 1:Si, 0:no: "))
+                menosvotadas=int(input("Desea conocer las 10 peliculas menos votadas? 1:Si, 0:no: "))
+                mejoresvotadas=int(input("Desea conocer las 10 peliculas mejores votadas? 1:Si, 0:no: "))
+                peoresvotadas=int(input("Desea conocer las 10 peliculas peores votadas? 1:Si, 0:no: "))
+                print(rankingpeliculas(listadetails,masvotadas,menosvotadas,mejoresvotadas,peoresvotadas))
             elif int(inputs[0])==0: #opcion 0, salir
                 sys.exit(0)
 
